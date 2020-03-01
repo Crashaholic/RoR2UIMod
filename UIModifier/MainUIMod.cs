@@ -19,7 +19,8 @@ namespace UIModifier
 	[BepInPlugin("com.ohway.UIMod", "UI Modifier", "1.0")]
 	public class MainUIMod : BaseUnityPlugin
 	{
-		private GameObject HealthBarReference = null;
+		private GameObject ModHealthBarReference = null;
+		private GameObject ModHealthBarBacking = null;
 		private GameObject MainHPBarRef = null;
 		private RectTransform[] rectTransforms = null;
 
@@ -54,12 +55,16 @@ namespace UIModifier
 		{
 			if (MainHPBarRef != null)
 			{
-				HealthBarReference = Instantiate(new GameObject("HealthGlobe"));
-				HealthBarReference.AddComponent<RectTransform>();
-				HealthBarReference.AddComponent<Image>();
-				HealthBarReference.GetComponent<Image>().sprite = Resources.Load<Sprite>("textures/itemicons/texShinyPearlIcon");
-				HealthBarReference.AddComponent<Mask>();
-				HealthBarReference.GetComponent<Mask>().showMaskGraphic = false;
+				ModHealthBarReference = Instantiate(new GameObject("HealthGlobe"));
+				ModHealthBarBacking = Instantiate(new GameObject("HealthGlobeBacking"));
+				ModHealthBarReference.AddComponent<RectTransform>();
+				ModHealthBarReference.AddComponent<Image>();
+				ModHealthBarReference.GetComponent<Image>().sprite = Resources.Load<Sprite>("textures/itemicons/texShinyPearlIcon");
+				ModHealthBarReference.AddComponent<Mask>();
+				ModHealthBarReference.GetComponent<Mask>().showMaskGraphic = false;
+				ModHealthBarBacking.AddComponent<RectTransform>();
+				ModHealthBarBacking.AddComponent<Image>();
+				ModHealthBarBacking.GetComponent<Image>().sprite = Resources.Load<Sprite>("textures/itemicons/texShinyPearlIcon");
 				for (int i = 0; i < MainHPBarRef.transform.childCount; ++i)
 				{
 					if (MainHPBarRef.transform.GetChild(i).name == "ShrunkenRoot")
@@ -67,13 +72,29 @@ namespace UIModifier
 						MainHPBarRef = MainHPBarRef.transform.GetChild(i).gameObject;
 					}
 				}
-				HealthBarReference.transform.position = MainHPBarRef.transform.position;
-				HealthBarReference.transform.parent = MainHPBarRef.transform.parent;
-				MainHPBarRef.transform.parent = HealthBarReference.transform;
-				HealthBarReference.transform.Rotate(0f, 0f, 90f);
-				MainHPBarRef.GetComponent<RectTransform>().sizeDelta = new Vector3(6, 6, 0);
-				HealthBarReference.transform.localScale = new Vector3(3, 3, 1);
-				HealthBarReference.transform.SetSiblingIndex(0);
+				ModHealthBarReference.transform.position = MainHPBarRef.transform.position;
+				ModHealthBarReference.transform.parent = MainHPBarRef.transform.parent;
+				ModHealthBarBacking.transform.position = MainHPBarRef.transform.position;
+				ModHealthBarBacking.transform.parent = MainHPBarRef.transform.parent;
+				MainHPBarRef.transform.parent = ModHealthBarReference.transform;
+
+				MainHPBarRef.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+				MainHPBarRef.GetComponent<RectTransform>().anchorMax = Vector2.one;
+				MainHPBarRef.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 10);
+
+				ModHealthBarReference.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+				ModHealthBarReference.GetComponent<RectTransform>().anchorMax = Vector2.zero;
+				ModHealthBarReference.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 200);
+				ModHealthBarReference.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 100);
+
+				ModHealthBarBacking.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+				ModHealthBarBacking.GetComponent<RectTransform>().anchorMax = Vector2.zero;
+				ModHealthBarBacking.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 200);
+				ModHealthBarBacking.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 100);
+				ModHealthBarReference.transform.Rotate(0f, 0f, 90f);
+
+				ModHealthBarBacking.transform.SetSiblingIndex(0);
+				ModHealthBarReference.transform.SetSiblingIndex(1);
 			}
 			else
 			{
@@ -95,12 +116,5 @@ namespace UIModifier
 		{
 			On.RoR2.UI.HealthBar.Awake -= HealthBarAwakeAddon;
 		}
-
-		//private void OverrideHealthUpdate(On.RoR2.UI.HealthBar.orig_Update orig, RoR2.UI.HealthBar self)
-		//{
-		//	//throw new NotImplementedException();
-		//	orig(self);
-		//
-		//}
 	}
 }
