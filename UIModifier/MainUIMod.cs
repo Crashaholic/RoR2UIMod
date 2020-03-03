@@ -17,6 +17,8 @@ using On.RoR2.UI;
 
 namespace UIModifier
 {
+	
+	[R2API.Utils.R2APISubmoduleDependency("ResourcesAPI")]
 	[BepInPlugin("com.ohway.UIMod", "UI Modifier", "1.0")]
 	public class MainUIMod : BaseUnityPlugin
 	{
@@ -25,15 +27,19 @@ namespace UIModifier
 		private GameObject MainHPBarRef = null;
 		private RectTransform[] rectTransforms = null;
 		private string assetPrefix = "@ohwayUIMod";
+		private string bundleName = "circularmask";
+		private string iconPath = "Assets/circularMask.png";
 
 		private string ResPath(string assetPath) => assetPrefix + ':' + assetPath;
 
 		void Awake()
 		{
-			var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIModifier.circularmask");
-			var bundle = AssetBundle.LoadFromStream(stream);
-			var provider = new R2API.AssetBundleResourcesProvider(assetPrefix, bundle);
-			R2API.ResourcesAPI.AddProvider(provider);
+			using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIModifier." + bundleName))
+			{
+				var bundle = AssetBundle.LoadFromStream(stream);
+				var provider = new R2API.AssetBundleResourcesProvider(assetPrefix, bundle);
+				R2API.ResourcesAPI.AddProvider(provider);
+			}
 			On.RoR2.UI.HealthBar.Awake += HealthBarAwakeAddon;
 		}
 
@@ -72,13 +78,13 @@ namespace UIModifier
 				ModHealthBarDecoration = Instantiate(new GameObject("HealthGlobeBacking"));
 				ModHealthBarReference.AddComponent<RectTransform>();
 				ModHealthBarReference.AddComponent<Image>();
-				ModHealthBarReference.GetComponent<Image>().sprite = Resources.Load<Sprite>(ResPath("Assets/circularMask.png"));
-				Chat.AddMessage("Could load image: " + (Resources.Load<Sprite>(ResPath("Assets/circularMask.png")) != null));
+				ModHealthBarReference.GetComponent<Image>().sprite = Resources.Load<Sprite>(ResPath(iconPath));
+				Chat.AddMessage("Could load image: " + (Resources.Load<Sprite>(ResPath(iconPath)) != null));
 				//ModHealthBarReference.AddComponent<Mask>();
 				//ModHealthBarReference.GetComponent<Mask>().showMaskGraphic = false;
 				ModHealthBarDecoration.AddComponent<RectTransform>();
 				ModHealthBarDecoration.AddComponent<Image>();
-				ModHealthBarDecoration.GetComponent<Image>().sprite = Resources.Load<Sprite>("textures/itemicons/texMeteorIcon");
+				//ModHealthBarDecoration.GetComponent<Image>().sprite = Resources.Load<Sprite>("textures/itemicons/texMeteorIcon");
 				for (int i = 0; i < MainHPBarRef.transform.childCount; ++i)
 				{
 					if (MainHPBarRef.transform.GetChild(i).name == "ShrunkenRoot")
