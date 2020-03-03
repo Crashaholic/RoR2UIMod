@@ -5,6 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="circularmask" />
+    <None Remove="diluvian" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="circularmask" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\AreaRelit\libs\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -19,6 +28,9 @@
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\AreaRelit\libs\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>..\libs\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\AreaRelit\libs\UnityEngine.CoreModule.dll</HintPath>

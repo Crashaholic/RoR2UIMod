@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using BepInEx;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -20,12 +21,19 @@ namespace UIModifier
 	public class MainUIMod : BaseUnityPlugin
 	{
 		private GameObject ModHealthBarReference = null;
-		private GameObject ModHealthBarBacking = null;
+		private GameObject ModHealthBarDecoration = null;
 		private GameObject MainHPBarRef = null;
 		private RectTransform[] rectTransforms = null;
+		private string assetPrefix = "@ohwayUIMod";
+
+		private string ResPath(string assetPath) => assetPrefix + ':' + assetPath;
 
 		void Awake()
 		{
+			var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIModifier.circularmask");
+			var bundle = AssetBundle.LoadFromStream(stream);
+			var provider = new R2API.AssetBundleResourcesProvider(assetPrefix, bundle);
+			R2API.ResourcesAPI.AddProvider(provider);
 			On.RoR2.UI.HealthBar.Awake += HealthBarAwakeAddon;
 		}
 
@@ -49,6 +57,11 @@ namespace UIModifier
 
 		void OnGUI()
 		{
+			var strings = Assembly.GetExecutingAssembly().GetManifestResourceNames();
+			for (int i = 0; i < strings.Length; i++)
+			{
+				GUILayout.Label(strings[i]);
+			}
 		}
 
 		private void MainHPOrbStart()
@@ -56,15 +69,16 @@ namespace UIModifier
 			if (MainHPBarRef != null)
 			{
 				ModHealthBarReference = Instantiate(new GameObject("HealthGlobe"));
-				ModHealthBarBacking = Instantiate(new GameObject("HealthGlobeBacking"));
+				ModHealthBarDecoration = Instantiate(new GameObject("HealthGlobeBacking"));
 				ModHealthBarReference.AddComponent<RectTransform>();
 				ModHealthBarReference.AddComponent<Image>();
-				ModHealthBarReference.GetComponent<Image>().sprite = Resources.Load<Sprite>("textures/itemicons/texShinyPearlIcon");
-				ModHealthBarReference.AddComponent<Mask>();
-				ModHealthBarReference.GetComponent<Mask>().showMaskGraphic = false;
-				ModHealthBarBacking.AddComponent<RectTransform>();
-				ModHealthBarBacking.AddComponent<Image>();
-				ModHealthBarBacking.GetComponent<Image>().sprite = Resources.Load<Sprite>("textures/itemicons/texShinyPearlIcon");
+				ModHealthBarReference.GetComponent<Image>().sprite = Resources.Load<Sprite>(ResPath("Assets/circularMask.png"));
+				Chat.AddMessage("Could load image: " + (Resources.Load<Sprite>(ResPath("Assets/circularMask.png")) != null));
+				//ModHealthBarReference.AddComponent<Mask>();
+				//ModHealthBarReference.GetComponent<Mask>().showMaskGraphic = false;
+				ModHealthBarDecoration.AddComponent<RectTransform>();
+				ModHealthBarDecoration.AddComponent<Image>();
+				ModHealthBarDecoration.GetComponent<Image>().sprite = Resources.Load<Sprite>("textures/itemicons/texMeteorIcon");
 				for (int i = 0; i < MainHPBarRef.transform.childCount; ++i)
 				{
 					if (MainHPBarRef.transform.GetChild(i).name == "ShrunkenRoot")
@@ -74,8 +88,8 @@ namespace UIModifier
 				}
 				ModHealthBarReference.transform.position = MainHPBarRef.transform.position;
 				ModHealthBarReference.transform.parent = MainHPBarRef.transform.parent;
-				ModHealthBarBacking.transform.position = MainHPBarRef.transform.position;
-				ModHealthBarBacking.transform.parent = MainHPBarRef.transform.parent;
+				ModHealthBarDecoration.transform.position = MainHPBarRef.transform.position;
+				ModHealthBarDecoration.transform.parent = MainHPBarRef.transform.parent;
 				MainHPBarRef.transform.parent = ModHealthBarReference.transform;
 
 				MainHPBarRef.GetComponent<RectTransform>().anchorMin = Vector2.zero;
@@ -87,13 +101,13 @@ namespace UIModifier
 				ModHealthBarReference.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 200);
 				ModHealthBarReference.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 100);
 
-				ModHealthBarBacking.GetComponent<RectTransform>().anchorMin = Vector2.zero;
-				ModHealthBarBacking.GetComponent<RectTransform>().anchorMax = Vector2.zero;
-				ModHealthBarBacking.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 200);
-				ModHealthBarBacking.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 100);
+				ModHealthBarDecoration.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+				ModHealthBarDecoration.GetComponent<RectTransform>().anchorMax = Vector2.zero;
+				ModHealthBarDecoration.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 200);
+				ModHealthBarDecoration.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 100);
 				ModHealthBarReference.transform.Rotate(0f, 0f, 90f);
 
-				ModHealthBarBacking.transform.SetSiblingIndex(0);
+				ModHealthBarDecoration.transform.SetSiblingIndex(0);
 				ModHealthBarReference.transform.SetSiblingIndex(1);
 			}
 			else
@@ -115,6 +129,8 @@ namespace UIModifier
 		void OnDestroy()
 		{
 			On.RoR2.UI.HealthBar.Awake -= HealthBarAwakeAddon;
+			Destroy(ModHealthBarReference);
+			Destroy(ModHealthBarDecoration);
 		}
 	}
 }
