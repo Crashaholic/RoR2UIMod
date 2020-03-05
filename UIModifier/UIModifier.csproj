@@ -7,10 +7,12 @@
   <ItemGroup>
     <None Remove="circularmask" />
     <None Remove="diluvian" />
+    <None Remove="textures" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="circularmask" />
+    <EmbeddedResource Include="textures" />
   </ItemGroup>
 
   <ItemGroup>
