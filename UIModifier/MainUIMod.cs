@@ -17,6 +17,7 @@ using On.RoR2.UI;
 
 namespace UIModifier
 {
+	
 	[R2API.Utils.R2APISubmoduleDependency("ResourcesAPI")]
 	[BepInPlugin("com.ohway.UIMod", "UI Modifier", "1.0")]
 	public class MainUIMod : BaseUnityPlugin
@@ -26,15 +27,19 @@ namespace UIModifier
 		private GameObject MainHPBarRef = null;
 		private RectTransform[] rectTransforms = null;
 		private string assetPrefix = "@ohwayUIMod";
+		private string bundleName = "circularmask";
+		private string iconPath = "Assets/circularMask.png";
 
 		private string ResPath(string assetPath) => assetPrefix + ':' + assetPath;
 
 		void Awake()
 		{
-			var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIModifier.circularmask");
-			var bundle = AssetBundle.LoadFromStream(stream);
-			var provider = new AssetBundleResourcesProvider(assetPrefix, bundle);
-			ResourcesAPI.AddProvider(provider);
+			using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("UIModifier." + bundleName))
+			{
+				var bundle = AssetBundle.LoadFromStream(stream);
+				var provider = new R2API.AssetBundleResourcesProvider(assetPrefix, bundle);
+				R2API.ResourcesAPI.AddProvider(provider);
+			}
 			On.RoR2.UI.HealthBar.Awake += HealthBarAwakeAddon;
 		}
 
