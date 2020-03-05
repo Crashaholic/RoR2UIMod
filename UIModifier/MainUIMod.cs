@@ -24,11 +24,13 @@ namespace UIModifier
 	{
 		private GameObject ModHealthBarReference = null;
 		private GameObject ModHealthBarDecoration = null;
+		private GameObject ModShrunkenRoot = null;
 		private GameObject MainHPBarRef = null;
 		private RectTransform[] rectTransforms = null;
 		private string assetPrefix = "@ohwayUIMod";
-		private string bundleName = "circularmask";
-		private string iconPath = "Assets/circularMask.png";
+		private string bundleName = "textures";
+		private string Path_CircularMask = "Assets/textures/circularMask.png";
+		private string Path_Decoration = "Assets/textures/hpOverlay.png";
 
 		private string ResPath(string assetPath) => assetPrefix + ':' + assetPath;
 
@@ -75,53 +77,40 @@ namespace UIModifier
 			if (MainHPBarRef != null)
 			{
 				ModHealthBarReference = Instantiate(new GameObject("HealthGlobe"));
-				//ModHealthBarDecoration = Instantiate(new GameObject("HealthGlobeBacking"));
+				ModHealthBarDecoration = Instantiate(new GameObject("HealthGlobeBacking"));
 				ModHealthBarReference.AddComponent<RectTransform>();
 				ModHealthBarReference.AddComponent<Image>();
-				ModHealthBarReference.GetComponent<Image>().sprite = Resources.Load<Sprite>(ResPath("Assets/circularMask.png"));
-				Chat.AddMessage("Could load image: " + (Resources.Load<Sprite>(ResPath("Assets/circularMask.png")) != null)); 
+				ModHealthBarReference.GetComponent<Image>().sprite = Resources.Load<Sprite>(ResPath(Path_CircularMask));
 				ModHealthBarReference.AddComponent<Mask>();
 				ModHealthBarReference.GetComponent<Mask>().showMaskGraphic = false;
-				//ModHealthBarDecoration.AddComponent<RectTransform>();
-				//ModHealthBarDecoration.AddComponent<Image>();
-				//ModHealthBarDecoration.GetComponent<Image>().sprite = Resources.Load<Sprite>("textures/itemicons/texMeteorIcon");
-
-				for (int i = 0; i < MainHPBarRef.transform.childCount; ++i)
-				{
-					if (MainHPBarRef.transform.GetChild(i).name == "ShrunkenRoot")
-					{
-						MainHPBarRef = MainHPBarRef.transform.GetChild(i).gameObject;
-					}
-				}
+				ModHealthBarDecoration.AddComponent<RectTransform>();
+				ModHealthBarDecoration.AddComponent<Image>();
+				ModHealthBarDecoration.GetComponent<Image>().sprite = Resources.Load<Sprite>(ResPath(Path_Decoration));
+				Destroy(MainHPBarRef.GetComponent<Image>());
+				ModShrunkenRoot = MainHPBarRef.transform.GetChild(0).gameObject;
 				
-				ModHealthBarReference.transform.position = MainHPBarRef.transform.position;
-				ModHealthBarReference.transform.SetParent(MainHPBarRef.transform.parent.parent.parent.parent.parent);
-				//ModHealthBarDecoration.transform.position = MainHPBarRef.transform.position;
-				//ModHealthBarDecoration.transform.SetParent(MainHPBarRef.transform.parent.parent.parent);
-				MainHPBarRef.transform.SetParent(ModHealthBarReference.transform);
+				ModHealthBarReference.transform.position = ModShrunkenRoot.transform.position;
+				ModHealthBarReference.transform.SetParent(ModShrunkenRoot.transform.parent.parent.parent.parent.parent);
+				ModHealthBarDecoration.transform.position = ModHealthBarReference.transform.position;
+				ModHealthBarDecoration.transform.SetParent(ModShrunkenRoot.transform.parent.parent.parent.parent.parent);
+				ModShrunkenRoot.transform.SetParent(ModHealthBarReference.transform);
 
-				//ModHealthBarReference.transform.parent.SetParent(ModHealthBarReference.transform.parent.parent);
-				//ModHealthBarDecoration.transform.parent.SetParent(ModHealthBarDecoration.transform.parent.parent);
-				Destroy(ModHealthBarReference.transform.parent.GetComponent<Image>());
-				Destroy(ModHealthBarReference.transform.parent.parent.GetComponent<Image>());
-
-
-				MainHPBarRef.GetComponent<RectTransform>().anchorMin = Vector2.zero;
-				MainHPBarRef.GetComponent<RectTransform>().anchorMax = Vector2.one;
-				MainHPBarRef.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 100);
+				ModShrunkenRoot.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+				ModShrunkenRoot.GetComponent<RectTransform>().anchorMax = Vector2.one;
+				ModShrunkenRoot.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 100);
 
 				ModHealthBarReference.GetComponent<RectTransform>().anchorMin = Vector2.zero;
 				ModHealthBarReference.GetComponent<RectTransform>().anchorMax = Vector2.zero;
 				ModHealthBarReference.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 200);
 				ModHealthBarReference.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 100);
 
-				//ModHealthBarDecoration.GetComponent<RectTransform>().anchorMin = Vector2.zero;
-				//ModHealthBarDecoration.GetComponent<RectTransform>().anchorMax = Vector2.zero;
-				//ModHealthBarDecoration.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 200);
-				//ModHealthBarDecoration.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 100);
+				ModHealthBarDecoration.GetComponent<RectTransform>().anchorMin = Vector2.zero;
+				ModHealthBarDecoration.GetComponent<RectTransform>().anchorMax = Vector2.zero;
+				ModHealthBarDecoration.GetComponent<RectTransform>().sizeDelta = new Vector2(200, 200);
+				ModHealthBarDecoration.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 100);
 
 				ModHealthBarReference.transform.Rotate(0f, 0f, 90f);
-				//ModHealthBarDecoration.transform.SetSiblingIndex(1);
+				ModHealthBarDecoration.transform.SetSiblingIndex(1);
 				ModHealthBarReference.transform.SetSiblingIndex(0);
 			}
 			else
