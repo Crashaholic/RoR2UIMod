@@ -75,8 +75,15 @@ namespace UIModifier
 			{
 				ModCanvas = Instantiate(new GameObject("UIModifierCanvas"));
 				ModCanvas.AddComponent<Canvas>();
+				ModCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
+				ModCanvas.GetComponent<Canvas>().worldCamera = VanillaHPBarRef.transform.root.gameObject.GetComponent<Canvas>().worldCamera;
+				
 				ModCanvas.AddComponent<CanvasScaler>();
-				ModCanvas.AddComponent<GraphicRaycaster>();
+				ModCanvas.GetComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+				ModCanvas.GetComponent<CanvasScaler>().referenceResolution = new Vector2(1920, 1080);
+				ModCanvas.GetComponent<CanvasScaler>().screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+
+				//ModCanvas.transform.SetSiblingIndex(VanillaHPBarRef.transform.root.GetSiblingIndex() - 1);
 
 				Destroy(GameObject.Find("BarRoots").GetComponent<Image>());
 				ModHealthBarRoot = Instantiate(new GameObject("HealthGlobeRoot"));
@@ -99,11 +106,11 @@ namespace UIModifier
 				ModHealthShrunkenRoot = VanillaHPBarRef.transform.GetChild(0).gameObject;
 				ModHealthSlashText = VanillaHPBarRef.transform.GetChild(1).gameObject;
 
-				ModHealthBarRoot.transform.SetParent(ModHealthShrunkenRoot.transform.root);
+				ModHealthBarRoot.transform.SetParent(ModCanvas.transform);
 				ModHealthBarReference.transform.position = ModHealthShrunkenRoot.transform.position;
-				ModHealthBarReference.transform.SetParent(ModHealthBarRoot.transform.root);
+				ModHealthBarReference.transform.SetParent(ModCanvas.transform);
 				ModHealthBarDecoration.transform.position = ModHealthBarReference.transform.position;
-				ModHealthBarDecoration.transform.SetParent(ModHealthBarRoot.transform.root);
+				ModHealthBarDecoration.transform.SetParent(ModCanvas.transform);
 				ModHealthShrunkenRoot.transform.SetParent(ModHealthBarReference.transform);
 				ModHealthSlashText.transform.SetParent(ModHealthBarReference.transform.parent);
 
@@ -118,17 +125,17 @@ namespace UIModifier
 				ModHealthBarReference.GetComponent<RectTransform>().anchorMin = Vector2.zero;
 				ModHealthBarReference.GetComponent<RectTransform>().anchorMax = Vector2.zero;
 				ModHealthBarReference.GetComponent<RectTransform>().sizeDelta = new Vector2(229, 229);
-				ModHealthBarReference.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 110);
+				ModHealthBarReference.GetComponent<RectTransform>().anchoredPosition = new Vector2(ModHealthBarReference.GetComponent<RectTransform>().sizeDelta.x / 2f, ModHealthBarReference.GetComponent<RectTransform>().sizeDelta.y / 2f);
 
 				ModHealthBarDecoration.GetComponent<RectTransform>().anchorMin = Vector2.zero;
 				ModHealthBarDecoration.GetComponent<RectTransform>().anchorMax = Vector2.zero;
 				ModHealthBarDecoration.GetComponent<RectTransform>().sizeDelta = new Vector2(250, 250);
-				ModHealthBarDecoration.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 110);
+				ModHealthBarDecoration.GetComponent<RectTransform>().anchoredPosition = new Vector2(ModHealthBarReference.GetComponent<RectTransform>().sizeDelta.x / 2f, ModHealthBarReference.GetComponent<RectTransform>().sizeDelta.y / 2f);
 
 				ModHealthSlashText.GetComponent<RectTransform>().anchorMin = Vector2.zero;
 				ModHealthSlashText.GetComponent<RectTransform>().anchorMax = Vector2.zero;
 				ModHealthSlashText.GetComponent<RectTransform>().pivot = Vector2.zero;
-				ModHealthSlashText.GetComponent<RectTransform>().anchoredPosition = new Vector2(100, 250);
+				ModHealthSlashText.GetComponent<RectTransform>().anchoredPosition = new Vector2(ModHealthBarReference.GetComponent<RectTransform>().sizeDelta.x / 2f, ModHealthBarDecoration.GetComponent<RectTransform>().sizeDelta.y);
 
 				ModHealthBarReference.transform.Rotate(0f, 0f, 90f);
 				ModHealthBarDecoration.transform.SetSiblingIndex(1);
