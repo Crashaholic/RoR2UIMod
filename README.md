@@ -15,6 +15,6 @@ Turns the health ***bar*** into a health ***globe***. Just like what it looks li
 - ... and leave the rest of the HUD alone.
 
 ## Images
-![Screenshot 1](https://raw.githubusercontent.com/Crashaholic/RoR2UIMod/master/Screenshot_1.png "Screenshot 1")Screenshot_1
+![Screenshot 1](https://raw.githubusercontent.com/Crashaholic/RoR2UIMod/master/Screenshot_1.png)
 
-![Screenshot 2](https://raw.githubusercontent.com/Crashaholic/RoR2UIMod/master/Screenshot_2.png "Screenshot 2")Screenshot_2
+![Screenshot 2](https://raw.githubusercontent.com/Crashaholic/RoR2UIMod/master/Screenshot_2.png)
