@@ -23,6 +23,10 @@ namespace UIModifier
 	public class MainUIMod : BaseUnityPlugin
 	{
 		public GameObject ModCanvas = null;
+		public string assetPrefix = "@ohwayUIMod";
+		public string bundleName = "textures";
+		public string Path_CircularMask = "Assets/textures/circularMask.png";
+		public string Path_HealthGlobeDecoration = "Assets/textures/hpOverlay.png";
 
 		#region Health Bar GameObjects
 		// If you're looking for Exp Bar GameObjects, look downwards
@@ -33,10 +37,6 @@ namespace UIModifier
 		public GameObject ModHealthSlashText = null;
 		public GameObject VanillaHPBarRef = null;
 		#endregion
-		public string assetPrefix = "@ohwayUIMod";
-		public string bundleName = "textures";
-		public string Path_CircularMask = "Assets/textures/circularMask.png";
-		public string Path_HealthGlobeDecoration = "Assets/textures/hpOverlay.png";
 
 		private string ResPath(string assetPath) => assetPrefix + ':' + assetPath;
 
@@ -50,6 +50,30 @@ namespace UIModifier
 			}
 			On.RoR2.UI.HealthBar.Awake += HealthBarAwakeAddon;
 			On.RoR2.UI.ExpBar.Awake += ExpBarAwakeAddon;
+			//On.RoR2.LocalUserManager.
+		}
+
+		private void SetUpModCanvas()
+		{
+			if (ModCanvas == null)
+			{
+				ModCanvas = new GameObject("UIModifierCanvas");
+				ModCanvas.AddComponent<Canvas>();
+				ModCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
+				if (VanillaExpBarRoot != null)
+				{
+					ModCanvas.GetComponent<Canvas>().worldCamera = VanillaExpBarRoot.transform.root.gameObject.GetComponent<Canvas>().worldCamera;
+				}
+				else if (VanillaHPBarRef != null)
+				{
+					ModCanvas.GetComponent<Canvas>().worldCamera = VanillaHPBarRef.transform.root.gameObject.GetComponent<Canvas>().worldCamera;
+				}
+
+				ModCanvas.AddComponent<CanvasScaler>();
+				ModCanvas.GetComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+				ModCanvas.GetComponent<CanvasScaler>().referenceResolution = new Vector2(1920, 1080);
+				ModCanvas.GetComponent<CanvasScaler>().screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+			}
 		}
 
 		private void HealthBarAwakeAddon(On.RoR2.UI.HealthBar.orig_Awake orig, RoR2.UI.HealthBar self)
@@ -73,22 +97,14 @@ namespace UIModifier
 		{
 			if (VanillaHPBarRef != null)
 			{
-				ModCanvas = Instantiate(new GameObject("UIModifierCanvas"));
-				ModCanvas.AddComponent<Canvas>();
-				ModCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceCamera;
-				ModCanvas.GetComponent<Canvas>().worldCamera = VanillaHPBarRef.transform.root.gameObject.GetComponent<Canvas>().worldCamera;
-				
-				ModCanvas.AddComponent<CanvasScaler>();
-				ModCanvas.GetComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-				ModCanvas.GetComponent<CanvasScaler>().referenceResolution = new Vector2(1920, 1080);
-				ModCanvas.GetComponent<CanvasScaler>().screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
-
+				SetUpModCanvas();
 				//ModCanvas.transform.SetSiblingIndex(VanillaHPBarRef.transform.root.GetSiblingIndex() - 1);
+				
 
 				Destroy(GameObject.Find("BarRoots").GetComponent<Image>());
-				ModHealthBarRoot = Instantiate(new GameObject("HealthGlobeRoot"));
-				ModHealthBarReference = Instantiate(new GameObject("HealthGlobe"));
-				ModHealthBarDecoration = Instantiate(new GameObject("HealthGlobeBacking"));
+				ModHealthBarRoot = new GameObject("HealthGlobeRoot");
+				ModHealthBarReference = new GameObject("HealthGlobe");
+				ModHealthBarDecoration = new GameObject("HealthGlobeBacking");
 
 				ModHealthBarReference.AddComponent<RectTransform>();
 				ModHealthBarReference.AddComponent<Image>();
@@ -148,7 +164,7 @@ namespace UIModifier
 			}
 		}
 
-		#region Exp bar GameObjects (DOES NOTHING FOR NOW)
+		#region Exp bar GameObjects
 		public GameObject VanillaExpBarRoot = null;
 		public GameObject ModExpShrunkenRoot = null;
 		public GameObject ModExpBarGroup = null;
@@ -163,8 +179,8 @@ namespace UIModifier
 				{
 					if (currentRect[i].name == "ExpBarRoot")
 					{
-						//VanillaExpBarRoot = currentRect[i].gameObject;
-						//MainExpBarStart();
+						VanillaExpBarRoot = currentRect[i].gameObject;
+						MainExpBarStart();
 					}
 				}
 			}
@@ -172,26 +188,109 @@ namespace UIModifier
 
 		private void MainExpBarStart()
 		{
-			ModExpShrunkenRoot = VanillaExpBarRoot.transform.GetChild(0).gameObject;
+			if (VanillaExpBarRoot != null)
+			{
+				SetUpModCanvas();
 
-			ModExpBarGroup = Instantiate(new GameObject("XPBarGroup"));
-			ModExpBarGroup.AddComponent<RectTransform>();
+				ModExpShrunkenRoot = VanillaExpBarRoot.transform.GetChild(0).gameObject;
 
-			ModExpBarGroup.transform.SetParent(VanillaExpBarRoot.transform.root);
-			ModExpShrunkenRoot.transform.SetParent(ModExpBarGroup.transform);
+				ModExpBarGroup = new GameObject("XPBarGroup");
 
-			ModExpBarGroup.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0f);
-			ModExpBarGroup.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0f);
-			ModExpBarGroup.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 30f);
+				ModExpBarGroup.transform.SetParent(ModCanvas.transform);
+				ModExpShrunkenRoot.transform.SetParent(ModExpBarGroup.transform);
+				ModExpBarGroup.transform.position = ModExpShrunkenRoot.transform.position;
 
-			ModExpShrunkenRoot.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0f);
-			ModExpShrunkenRoot.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0f);
-			ModExpShrunkenRoot.GetComponent<RectTransform>().sizeDelta = new Vector2(300f, 10f);
-			ModExpShrunkenRoot.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 0f);
+				ModExpBarGroup.AddComponent<RectTransform>();
+				ModExpBarGroup.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0.5f);
+				ModExpBarGroup.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0.5f);
+				ModExpBarGroup.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 0f);
+
+				ModExpShrunkenRoot.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0f);
+				ModExpShrunkenRoot.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0f);
+				ModExpShrunkenRoot.GetComponent<RectTransform>().sizeDelta = new Vector2(300f, 1000f);
+				ModExpShrunkenRoot.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 0f);
+
+			}
 		}
 
+		public GameObject HierachyTracker = null;
+		public bool HierachyViewerPanelShow = false;
+		public Vector2 scrollPosition = Vector2.zero;
 		void OnGUI()
 		{
+			#region Runtime Hierachy Viewer
+			if (HierachyViewerPanelShow)
+			{
+				if (HierachyTracker == null)
+				{
+					HierachyTracker = new GameObject("HierachyTracker");
+				}
+				// HiearchyTracker is at root, so get the scene root objects
+				if (HierachyTracker.transform.root == HierachyTracker.transform)
+				{
+					var allGameObjects = UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects();
+					scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(300), GUILayout.Height(500));
+					for (int i = 0; i < allGameObjects.Length; ++i)
+					{
+						if (allGameObjects[i].name.Contains("HierachyTracker")) continue;
+						if (GUILayout.Button(allGameObjects[i].name))
+						{
+							if (allGameObjects[i].transform.childCount > 0)
+							{
+								HierachyTracker.transform.SetParent(allGameObjects[i].transform);
+							}
+						}
+					}
+					GUILayout.EndScrollView();
+				}
+				else
+				{
+					if (GUILayout.Button("< Up"))
+					{
+						if (HierachyTracker.transform.parent.root == HierachyTracker.transform.parent)
+						{
+							HierachyTracker.transform.SetParent(null);
+						}
+						else
+						{
+							HierachyTracker.transform.SetParent(HierachyTracker.transform.parent.parent);
+						}
+					}
+					scrollPosition = GUILayout.BeginScrollView(scrollPosition, GUILayout.Width(300), GUILayout.Height(500));
+					for (int i = 0; i < HierachyTracker.transform.parent.childCount; ++i)
+					{
+						if (HierachyTracker.transform.parent.GetChild(i).name.Contains("HierachyTracker")) continue;
+						if (GUILayout.Button(HierachyTracker.transform.parent.GetChild(i).name))
+						{
+							if (HierachyTracker.transform.parent.GetChild(i).childCount > 0)
+							{
+								HierachyTracker.transform.SetParent(HierachyTracker.transform.parent.GetChild(i));
+							}
+						}
+					}
+					GUILayout.EndScrollView();
+				}
+			}
+			#endregion
+		}
+
+		void Update()
+		{
+			if (Input.GetKeyDown(KeyCode.F7))
+			{
+				HierachyViewerPanelShow = !HierachyViewerPanelShow;
+			}
+			if (VanillaHPBarRef != null)
+			{
+				if (RoR2.LocalUserManager.GetFirstLocalUser() != null)
+				{
+					if (RoR2.LocalUserManager.GetFirstLocalUser().cachedBodyObject != null)
+					{
+						var body = RoR2.LocalUserManager.GetFirstLocalUser().cachedBody;
+						print("Life: " + body.healthComponent.health + "/" + body.healthComponent.fullHealth + "\n Barrier: " + body.healthComponent.barrier);
+					}
+				}
+			}
 		}
 
 		void OnDestroy()
